@@ -47,12 +47,12 @@ export function Footer() {
 
             {/* Kids Column */}
             <div>
-              <h3 className="text-sm font-medium mb-4">Kids'</h3>
+              <h3 className="text-sm font-medium mb-4">Kids&apos;</h3>
               <ul className="space-y-3 text-gray-500 text-sm">
-                <li><Link href="#" className="hover:text-black">Infant & Toddler Shoes</Link></li>
-                <li><Link href="#" className="hover:text-black">Kids' Shoes</Link></li>
-                <li><Link href="#" className="hover:text-black">Kids' Jordan Shoes</Link></li>
-                <li><Link href="#" className="hover:text-black">Kids' Basketball Shoes</Link></li>
+                <li><Link href="#" className="hover:text-black">Infant &amp; Toddler Shoes</Link></li>
+                <li><Link href="#" className="hover:text-black">Kids&apos; Shoes</Link></li>
+                <li><Link href="#" className="hover:text-black">Kids&apos; Jordan Shoes</Link></li>
+                <li><Link href="#" className="hover:text-black">Kids&apos; Basketball Shoes</Link></li>
               </ul>
             </div>
           </div>
