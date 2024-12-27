@@ -44,7 +44,7 @@ export default function SignInPage() {
             <Link href="/terms" className="underline">Terms of Use</Link>.
           </p>
 
-          <button className="w-full bg-black text-white py-3 rounded-full">
+          <button className="w-full bg-black text-white py-3">
             SIGN IN
           </button>
         </form>

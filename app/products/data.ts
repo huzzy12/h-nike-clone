@@ -199,8 +199,8 @@ export type Product = {
   ]
   
   // Initial products to show (first 12)
-  export const initialProducts = allProducts.slice(0, 12)
+  export const initialProducts = allProducts.slice(0, 22)
   
   // Products per load
-  export const PRODUCTS_PER_PAGE = 12
+  export const PRODUCTS_PER_PAGE = 22
   
