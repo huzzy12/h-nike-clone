@@ -12,7 +12,7 @@ export default function ProductDetailPage() {
       <div className="flex-1">
         <div className="relative aspect-square w-full max-w-xl bg-gray-100 rounded-lg overflow-hidden">
           <Image
-            src="/nike-air-force.jpg"  // Place your image in the public folder
+            src="/nike-air-force.jpg"
             alt="Nike Air Force 1 PLT.AF.ORM"
             fill
             className="object-cover"
@@ -28,7 +28,7 @@ export default function ProductDetailPage() {
         
         <p className="text-gray-600 leading-relaxed">
           Turn style on its head with this crafted take on the Air Jordan 1 Mid. 
-          Its "inside out"-inspired construction, including unique layering and 
+          Its &ldquo;inside out&rdquo;-inspired construction, including unique layering and 
           exposed foam accents, ups the ante on this timeless Jordan Brand silhouette. 
           Details like the deco stitching on the Swoosh add coveted appeal, while 
           the unexpected shading, rich mixture of materials and aged midsole 
