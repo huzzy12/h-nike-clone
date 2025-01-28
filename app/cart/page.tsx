@@ -1,135 +1,85 @@
 'use client'
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { Heart, Trash2 } from 'lucide-react'
+import { useCart } from '@/app/context/CartContext';
+import { urlFor } from '@/sanity/lib/client';
+import Link from 'next/link';
 
 export default function CartPage() {
+  const { cart, removeFromCart, updateQuantity, getCartTotal } = useCart();
+
+  if (cart.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold mb-4">Your Cart is Empty</h1>
+        <Link href="/products" className="text-blue-500 hover:underline">
+          Continue Shopping
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-6 py-12">
-      {/* Free Delivery Banner */}
-      <div className="bg-gray-50 p-6 mb-10 rounded-xl">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="font-medium text-lg mb-1">Free Delivery</p>
-            <p className="text-gray-600">Applies to orders of ₹14,000.00 or more.</p>
-          </div>
-          <Link href="#" className="text-black underline hover:no-underline">View details</Link>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-8">Shopping Cart</h1>
+      
+      <div className="grid md:grid-cols-3 gap-8">
+        <div className="md:col-span-2 space-y-4">
+          {cart.map((item) => (
+            <div key={item._id} className="flex border rounded-lg p-4 gap-4">
+              <img
+                src={urlFor(item.image).width(100).height(100).url()}
+                alt={item.productName}
+                className="w-24 h-24 object-cover rounded"
+              />
+              
+              <div className="flex-grow">
+                <h3 className="font-medium">{item.productName}</h3>
+                <p className="text-gray-600">${item.price}</p>
+                
+                <div className="flex items-center gap-4 mt-2">
+                  <select
+                    value={item.quantity}
+                    onChange={(e) => updateQuantity(item._id, Number(e.target.value))}
+                    className="border rounded px-2 py-1"
+                  >
+                    {[...Array(10)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                  
+                  <button
+                    onClick={() => removeFromCart(item._id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-16">
-        {/* Cart Items */}
-        <div className="flex-1 max-w-[700px]">
-          <h1 className="text-2xl font-medium mb-8">Bag</h1>
-          
-          {/* Product 1 */}
-          <div className="border-b border-gray-200 pb-8 mb-8">
-            <div className="flex gap-6">
-              <div className="w-28 h-28 bg-gray-100 rounded-lg relative flex-shrink-0">
-                <Image
-                  src="/product-1.jpg"
-                  alt="Nike Dri-FIT ADV TechKnit Ultra"
-                  fill
-                  className="object-cover rounded-lg"
-                />
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <div>
-                    <h3 className="font-medium mb-1">Nike Dri-FIT ADV TechKnit Ultra</h3>
-                    <p className="text-gray-600 mb-1">Men&apos;s Short-Sleeve Running Top</p>
-                    <p className="text-gray-600 mb-2">Ashen Slate/Cobalt Bliss</p>
-                    <div className="flex gap-6">
-                      <p className="text-sm">Size: L</p>
-                      <p className="text-sm">Quantity: 1</p>
-                    </div>
-                  </div>
-                  <p className="font-medium">₹3,895.00</p>
-                </div>
-                <div className="flex gap-6 mt-6">
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors">
-                    <Heart size={20} strokeWidth={1.5} />
-                    <span className="text-sm">Favourite</span>
-                  </button>
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors">
-                    <Trash2 size={20} strokeWidth={1.5} />
-                    <span className="text-sm">Remove</span>
-                  </button>
-                </div>
+        
+        <div className="bg-gray-50 p-6 rounded-lg h-fit">
+          <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>${getCartTotal().toFixed(2)}</span>
+            </div>
+            <div className="border-t pt-2 mt-2">
+              <div className="flex justify-between font-bold">
+                <span>Total</span>
+                <span>${getCartTotal().toFixed(2)}</span>
               </div>
             </div>
           </div>
-
-          {/* Product 2 */}
-          <div className="border-b border-gray-200 pb-8 mb-8">
-            <div className="flex gap-6">
-              <div className="w-28 h-28 bg-gray-100 rounded-lg relative flex-shrink-0">
-                <Image
-                  src="/product-2.jpg"
-                  alt="Nike Air Max 97 SE"
-                  fill
-                  className="object-cover rounded-lg"
-                />
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <div>
-                    <h3 className="font-medium mb-1">Nike Air Max 97 SE</h3>
-                    <p className="text-gray-600 mb-1">Men&apos;s Shoes</p>
-                    <p className="text-gray-600 mb-2">Flat Pewter/Light Bone/Black/White</p>
-                    <div className="flex gap-6">
-                      <p className="text-sm">Size: 8</p>
-                      <p className="text-sm">Quantity: 1</p>
-                    </div>
-                  </div>
-                  <p className="font-medium">₹16,995.00</p>
-                </div>
-                <div className="flex gap-6 mt-6">
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors">
-                    <Heart size={20} strokeWidth={1.5} />
-                    <span className="text-sm">Favourite</span>
-                  </button>
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors">
-                    <Trash2 size={20} strokeWidth={1.5} />
-                    <span className="text-sm">Remove</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <button className="w-full bg-black text-white py-3 rounded-full mt-6 hover:bg-gray-800">
+            Checkout
+          </button>
         </div>
-
-        {/* Summary */}
-        <div className="w-full lg:w-[400px] bg-gray-50 p-8 rounded-xl h-fit">
-          <h2 className="text-xl font-medium mb-6">Summary</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between text-sm">
-              <p>Subtotal</p>
-              <p>₹20,890.00</p>
-            </div>
-            <div className="flex justify-between text-sm">
-              <p>Estimated Delivery & Handling</p>
-              <p>Free</p>
-            </div>
-            <div className="border-t border-gray-200 pt-4">
-              <div className="flex justify-between font-medium">
-                <p>Total</p>
-                <p>₹20,890.00</p>
-              </div>
-            </div>
-            <button className="w-full bg-black text-white font-medium text-lg py-4 rounded-full mt-4 hover:bg-gray-800 transition-colors">
-              Member Checkout
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Favourites Section */}
-      <div className="mt-16 mb-8">
-        <h2 className="text-xl font-medium mb-4">Favourites</h2>
-        <p className="text-gray-600">There are no items saved to your favourites.</p>
       </div>
     </div>
-  )
+  );
 }

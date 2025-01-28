@@ -3,13 +3,32 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Search, ShoppingBag, Heart, Menu } from "lucide-react"
-import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
+import { useState, FormEvent } from "react"
+import { useCart } from "@/app/context/CartContext"
 
 export function Header() {
   const pathname = usePathname()
+  const router = useRouter()
   const isHomePage = pathname === "/"
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const { cart } = useCart()
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`)
+    } else {
+      router.push('/products')
+    }
+    setIsMenuOpen(false)
+  }
+
+  const handleCategoryClick = (category: string) => {
+    router.push(`/products?category=${category.toLowerCase()}`)
+    setIsMenuOpen(false)
+  }
 
   return (
     <header className="relative">
@@ -20,11 +39,12 @@ export function Header() {
         </Link>
         <nav className="hidden sm:block">
           <ul className="flex items-center space-x-4">
-            <li>
-              <Link href="/store" className="hover:text-gray-600">
-                Find a Store
-              </Link>
-            </li>
+           <li>
+        <Link href="/products" className="hover:text-gray-600">
+               Shop All
+        </Link>
+          </li>
+
             <li>|</li>
             <li>
               <Link href="/help" className="hover:text-gray-600">
@@ -55,55 +75,88 @@ export function Header() {
         <nav className="hidden md:block flex-1">
           <ul className="flex items-center space-x-4 sm:space-x-8">
             <li>
-              <Link href="/new" className="font-medium hover:text-gray-600">
+              <button
+                onClick={() => handleCategoryClick('new')}
+                className="font-medium hover:text-gray-600"
+              >
                 New & Featured
-              </Link>
+              </button>
             </li>
             <li>
-              <Link href="/men" className="font-medium hover:text-gray-600">
+              <button
+                onClick={() => handleCategoryClick('men')}
+                className="font-medium hover:text-gray-600"
+              >
                 Men
-              </Link>
+              </button>
             </li>
             <li>
-              <Link href="/women" className="font-medium hover:text-gray-600">
+              <button
+                onClick={() => handleCategoryClick('women')}
+                className="font-medium hover:text-gray-600"
+              >
                 Women
-              </Link>
+              </button>
             </li>
             <li>
-              <Link href="/kids" className="font-medium hover:text-gray-600">
+              <button
+                onClick={() => handleCategoryClick('kids')}
+                className="font-medium hover:text-gray-600"
+              >
                 Kids
-              </Link>
+              </button>
             </li>
             <li>
-              <Link href="/sale" className="font-medium hover:text-gray-600">
+              <button
+                onClick={() => handleCategoryClick('sale')}
+                className="font-medium hover:text-gray-600"
+              >
                 Sale
-              </Link>
+              </button>
             </li>
             <li>
-              <Link href="/snkrs" className="font-medium hover:text-gray-600">
+              <button
+                onClick={() => handleCategoryClick('snkrs')}
+                className="font-medium hover:text-gray-600"
+              >
                 SNKRS
-              </Link>
+              </button>
             </li>
           </ul>
         </nav>
         <div className="flex items-center space-x-4">
           <div className="relative hidden sm:block">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="search"
-              placeholder="Search"
-              className="pl-10 pr-4 py-2 rounded-full bg-gray-100 w-40 focus:outline-none focus:ring-2 focus:ring-gray-200"
-            />
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search"
+                className="pl-10 pr-4 py-2 rounded-full bg-gray-100 w-40 focus:outline-none focus:ring-2 focus:ring-gray-200"
+              />
+            </form>
           </div>
           <button className="hover:text-gray-600">
             <Heart className="w-6 h-6" />
             <span className="sr-only">Favorites</span>
           </button>
-          <button className="hover:text-gray-600">
+          
+          <Link href="/cart" className="hover:text-gray-600 relative">
             <ShoppingBag className="w-6 h-6" />
+            {cart.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                {cart.length}
+              </span>
+            )}
             <span className="sr-only">Bag Items</span>
-          </button>
-          <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          </Link>
+
+          <button 
+            className="md:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
             <Menu className="w-6 h-6" />
             <span className="sr-only">Menu</span>
           </button>
@@ -116,43 +169,66 @@ export function Header() {
           <nav className="px-4 py-2">
             <ul className="space-y-2">
               <li>
-                <Link href="/new" className="block py-2 hover:bg-gray-100">
+                <button
+                  onClick={() => handleCategoryClick('new')}
+                  className="block w-full text-left py-2 hover:bg-gray-100"
+                >
                   New & Featured
-                </Link>
+                </button>
               </li>
               <li>
-                <Link href="/men" className="block py-2 hover:bg-gray-100">
+                <button
+                  onClick={() => handleCategoryClick('men')}
+                  className="block w-full text-left py-2 hover:bg-gray-100"
+                >
                   Men
-                </Link>
+                </button>
               </li>
               <li>
-                <Link href="/women" className="block py-2 hover:bg-gray-100">
+                <button
+                  onClick={() => handleCategoryClick('women')}
+                  className="block w-full text-left py-2 hover:bg-gray-100"
+                >
                   Women
-                </Link>
+                </button>
               </li>
               <li>
-                <Link href="/kids" className="block py-2 hover:bg-gray-100">
+                <button
+                  onClick={() => handleCategoryClick('kids')}
+                  className="block w-full text-left py-2 hover:bg-gray-100"
+                >
                   Kids
-                </Link>
+                </button>
               </li>
               <li>
-                <Link href="/sale" className="block py-2 hover:bg-gray-100">
+                <button
+                  onClick={() => handleCategoryClick('sale')}
+                  className="block w-full text-left py-2 hover:bg-gray-100"
+                >
                   Sale
-                </Link>
+                </button>
               </li>
               <li>
-                <Link href="/snkrs" className="block py-2 hover:bg-gray-100">
+                <button
+                  onClick={() => handleCategoryClick('snkrs')}
+                  className="block w-full text-left py-2 hover:bg-gray-100"
+                >
                   SNKRS
-                </Link>
+                </button>
               </li>
             </ul>
           </nav>
           <div className="px-4 py-2">
-            <input
-              type="search"
-              placeholder="Search"
-              className="w-full px-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
-            />
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search"
+                className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+              />
+            </form>
           </div>
         </div>
       )}
@@ -175,4 +251,3 @@ export function Header() {
     </header>
   )
 }
-

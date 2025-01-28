@@ -1,5 +1,9 @@
+'use client'
+
+import { useState, useEffect } from 'react';
 import Image from "next/image"
-// import Link from "next/link"
+import Link from "next/link"
+import { ShoppingBag } from 'lucide-react';
 
 // Assuming ProductCard component is defined elsewhere
 const ProductCard = ({ image, name, price, category }: { image: string; name: string; price: string; category?: string }) => (
@@ -12,8 +16,23 @@ const ProductCard = ({ image, name, price, category }: { image: string; name: st
 )
 
 export default function Home() {
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowButton(true);
+      } else {
+        setShowButton(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <main className="flex flex-col min-h-screen">
+    <main className="flex flex-col min-h-screen relative">
       {/* Hero Section */}
       <section className="relative mb-8 sm:mb-16">
         <div className="aspect-[4/3] sm:aspect-[16/9] relative overflow-hidden">
@@ -66,9 +85,11 @@ export default function Home() {
           <p className="text-gray-900 mb-4 sm:mb-6 text-sm sm:text-base">
             Cause everyone should know the feeling of running in that perfect pair.
           </p>
-          <button className="bg-black text-white px-4 sm:px-6 py-2 rounded-full hover:bg-gray-800 text-sm sm:text-base">
-            Find Your Shoe
-          </button>
+          <Link href="/products">
+            <button className="bg-black text-white px-4 sm:px-6 py-2 rounded-full hover:bg-gray-800 text-sm sm:text-base">
+              Shop All Products
+            </button>
+          </Link>
         </div>
       </section>
 
@@ -183,6 +204,22 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Floating Shop All Button */}
+      {showButton && (
+        <Link href="/products">
+          <button 
+            className="fixed bottom-6 right-6 bg-black text-white px-4 py-3 rounded-full shadow-lg hover:bg-gray-800 transition-all z-50 flex items-center gap-2 animate-fade-in"
+            style={{
+              animation: 'fadeIn 0.3s ease-in-out',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }}
+          >
+            <ShoppingBag className="w-5 h-5" />
+            <span className="font-medium">Shop All</span>
+          </button>
+        </Link>
+      )}
     </main>
   )
 }

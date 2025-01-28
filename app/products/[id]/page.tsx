@@ -1,65 +1,138 @@
+// app/products/[id]/page.tsx
 'use client'
 
-import Image from 'next/image'
-import { useState } from 'react'
+import { useCart } from '@/app/context/CartContext';
+import { client, urlFor } from '@/sanity/lib/client';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-export default function ProductDetailPage() {
-  const [selectedSize, setSelectedSize] = useState('')
+export default function ProductPage({ params }: { params: { id: string } }) {
+  const { addToCart } = useCart();
+  const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const data = await client.fetch(`
+          *[_type == "product" && _id == $id][0]{
+            _id,
+            productName,
+            description,
+            price,
+            category,
+            inventory,
+            colors,
+            status,
+            "image": image.asset._ref
+          }
+        `, { id: params.id });
+        setProduct(data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        setIsLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [params.id]);
+
+  if (isLoading) return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  if (!product) return <div className="container mx-auto px-4 py-8">Product not found</div>;
+
+  const handleAddToCart = () => {
+    addToCart({
+      _id: product._id,
+      productName: product.productName,
+      price: product.price,
+      image: product.image,
+      quantity: quantity
+    });
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
-      {/* Product Images */}
-      <div className="flex-1">
-        <div className="relative aspect-square w-full max-w-xl bg-gray-100 rounded-lg overflow-hidden">
-          <Image
-            src="/nike-air-force.jpg"
-            alt="Nike Air Force 1 PLT.AF.ORM"
-            fill
-            className="object-cover"
-            priority
+    <div className="container mx-auto px-4 py-8">
+      <Link href="/products" className="text-blue-500 hover:underline mb-8 inline-block">
+        ← Back to Products
+      </Link>
+      
+      <div className="grid md:grid-cols-2 gap-8">
+        <div>
+          <img
+            src={urlFor(product.image).width(500).height(500).url()}
+            alt={product.productName}
+            className="w-full rounded-lg shadow-lg"
           />
         </div>
-      </div>
-
-      {/* Product Info */}
-      <div className="flex-1 space-y-6">
-        <h1 className="text-3xl font-medium">Nike Air Force 1 PLT.AF.ORM</h1>
-        <p className="text-2xl">₹8,695.00</p>
         
-        <p className="text-gray-600 leading-relaxed">
-          Turn style on its head with this crafted take on the Air Jordan 1 Mid. 
-          Its &ldquo;inside out&rdquo;-inspired construction, including unique layering and 
-          exposed foam accents, ups the ante on this timeless Jordan Brand silhouette. 
-          Details like the deco stitching on the Swoosh add coveted appeal, while 
-          the unexpected shading, rich mixture of materials and aged midsole 
-          aesthetic give this release an artisan finish.
-        </p>
+        <div>
+          <h1 className="text-3xl font-bold mb-4">{product.productName}</h1>
+          <p className="text-xl font-bold mb-4">${product.price}</p>
+          <p className="text-gray-600 mb-6">{product.description}</p>
+          
+          <div className="space-y-4 mb-6">
+            {product.category && (
+              <div>
+                <h3 className="font-semibold">Category:</h3>
+                <p>{product.category}</p>
+              </div>
+            )}
+            
+            {product.status && (
+              <div>
+                <h3 className="font-semibold">Status:</h3>
+                <p>{product.status}</p>
+              </div>
+            )}
+            
+            {product.inventory && (
+              <div>
+                <h3 className="font-semibold">Inventory:</h3>
+                <p>{product.inventory} units available</p>
+              </div>
+            )}
+            
+            {product.colors && product.colors.length > 0 && (
+              <div>
+                <h3 className="font-semibold">Available Colors:</h3>
+                <div className="flex gap-2">
+                  {product.colors.map((color: string) => (
+                    <span key={color} className="px-3 py-1 bg-gray-100 rounded">
+                      {color}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
-        {/* Size Selection */}
-        <div className="space-y-4">
-          <h2 className="font-medium">Select Size</h2>
-          <div className="grid grid-cols-3 gap-2">
-            {['UK 6', 'UK 7', 'UK 8', 'UK 9', 'UK 10', 'UK 11'].map((size) => (
-              <button
-                key={size}
-                onClick={() => setSelectedSize(size)}
-                className={`border rounded-md py-3 text-center transition-colors
-                  ${selectedSize === size
-                    ? 'border-black'
-                    : 'border-gray-300 hover:border-gray-400'
-                  }`}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <label htmlFor="quantity" className="font-medium">Quantity:</label>
+              <select
+                id="quantity"
+                value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+                className="border rounded-md px-2 py-1"
               >
-                {size}
-              </button>
-            ))}
+                {[...Array(10)].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {i + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <button
+              onClick={handleAddToCart}
+              className="w-full bg-black text-white py-3 px-6 rounded-full hover:bg-gray-800 transition-colors"
+            >
+              Add to Cart
+            </button>
           </div>
         </div>
-
-        {/* Add to Cart Button */}
-        <button className="w-full md:w-auto px-8 py-3 bg-black text-white rounded-full hover:bg-gray-800 transition-colors">
-          Add to Cart
-        </button>
       </div>
     </div>
-  )
+  );
 }
