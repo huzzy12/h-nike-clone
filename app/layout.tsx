@@ -1,5 +1,4 @@
-// app/layout.tsx
-
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
@@ -27,6 +26,7 @@ export default function RootLayout({
             <Header />
             <main className="flex-grow"> {/* Add flex-grow to push footer down */}
               {children}
+              <Analytics />
             </main>
             <Footer />
           </div>
