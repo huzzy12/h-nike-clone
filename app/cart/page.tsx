@@ -3,6 +3,7 @@
 import { useCart } from '@/app/context/CartContext';
 import { urlFor } from '@/sanity/lib/client';
 import Link from 'next/link';
+import Image from 'next/image'; // Added this import
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, getCartTotal } = useCart();
@@ -26,10 +27,12 @@ export default function CartPage() {
         <div className="md:col-span-2 space-y-4">
           {cart.map((item) => (
             <div key={item._id} className="flex border rounded-lg p-4 gap-4">
-              <img
+              <Image
                 src={urlFor(item.image).width(100).height(100).url()}
                 alt={item.productName}
-                className="w-24 h-24 object-cover rounded"
+                width={100}
+                height={100}
+                className="object-cover rounded"
               />
               
               <div className="flex-grow">

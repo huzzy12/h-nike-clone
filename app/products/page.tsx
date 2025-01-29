@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { client, urlFor } from '@/sanity/lib/client';
 import { useCart } from '@/app/context/CartContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 interface Product {
@@ -17,7 +18,7 @@ interface Product {
   image: string;
 }
 
-export default function ProductsPage() {
+function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const { addToCart } = useCart();
@@ -48,49 +49,46 @@ export default function ProductsPage() {
     };
     fetchProducts();
   }, []);
- 
- useEffect(() => {
-     let filtered = [...products];
- 
-     // Apply category filter
-     if (categoryFilter) {
-       filtered = filtered.filter((product) => {
-         const categoryLower = product.category?.toLowerCase() || '';
-         
-         switch (categoryFilter.toLowerCase()) {
-           case 'new':
-             return product.isNewArrival;
-           case 'men':
-             // Check if it's a men's product but not a women's product
-             return categoryLower.includes('men') && !categoryLower.includes('women');
-           case 'women':
-             return categoryLower.includes('women');
-           case 'kids':
-             return categoryLower.includes('kids');
-           case 'sale':
-             return product.status?.toLowerCase() === 'sale';
-           case 'snkrs':
-             return categoryLower.includes('shoes') || 
-                    categoryLower.includes('sneakers');
-           default:
-             return true;
-         }
-       });
-     }
- 
-     // Apply search filter
-     if (searchQuery) {
-       filtered = filtered.filter((product) =>
-         product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         product.category?.toLowerCase().includes(searchQuery.toLowerCase())
-       );
-     }
- 
-     setFilteredProducts(filtered);
-   }, [searchQuery, categoryFilter, products]);
- 
 
+  useEffect(() => {
+    let filtered = [...products];
+
+    // Your existing filter logic...
+    if (categoryFilter) {
+      filtered = filtered.filter((product) => {
+        const categoryLower = product.category?.toLowerCase() || '';
+        
+        switch (categoryFilter.toLowerCase()) {
+          case 'new':
+            return product.isNewArrival;
+          case 'men':
+            return categoryLower.includes('men') && !categoryLower.includes('women');
+          case 'women':
+            return categoryLower.includes('women');
+          case 'kids':
+            return categoryLower.includes('kids');
+          case 'sale':
+            return product.status?.toLowerCase() === 'sale';
+          case 'snkrs':
+            return categoryLower.includes('shoes') || 
+                   categoryLower.includes('sneakers');
+          default:
+            return true;
+        }
+      });
+    }
+
+    if (searchQuery) {
+      filtered = filtered.filter((product) =>
+        product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    setFilteredProducts(filtered);
+  }, [searchQuery, categoryFilter, products]);
+ 
   return (
     <main className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -109,10 +107,12 @@ export default function ProductsPage() {
               <div key={product._id} className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <Link href={`/products/${product._id}`}>
                   <div className="relative aspect-square">
-                    <img
+                    <Image
                       src={urlFor(product.image).width(400).height(400).url()}
                       alt={product.productName}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                   <div className="p-4">
@@ -163,5 +163,17 @@ export default function ProductsPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading products...</div>
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }
